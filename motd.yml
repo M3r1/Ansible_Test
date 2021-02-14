@@ -1,0 +1,28 @@
+---
+- name: motd proxy
+  become: yes
+  hosts: proxy
+
+  tasks:
+  - name: edit motd
+    shell:
+      cmd: echo "Welcome to HAProxy server" > /etc/motd
+
+- name: motd webservers
+  become: yes
+  hosts: webservers
+
+  tasks:
+  - name: edit motd
+    shell:
+      cmd: echo "Welcome to Apache server" > /etc/motd
+
+
+- name: motd database
+  become: yes
+  hosts: database
+
+  tasks:
+  - name: edit motd
+    shell:
+      cmd: echo "Welcome to MySQL server" > /etc/motd

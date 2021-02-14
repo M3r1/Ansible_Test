@@ -1,0 +1,27 @@
+---
+- name: Time log proxy
+  hosts: proxy
+
+  tasks:
+  - name: Create scripts dir
+    file:
+      path: '/home/automation/scripts'
+      state: 'directory'
+      mode: '0700'
+      owner: 'automation'
+      group: 'automation'
+
+  - name: Create script
+    copy:
+      src: '/home/automation/plays/scripts/proxy/log_date'
+      dest: '/home/automation/scripts'
+      mode: '0700'
+      owner: 'automation'
+      group: 'automation'
+
+  - name: Add cronjob
+    become: yes
+    cron:
+      name: 'Log date command every hour'
+      minute: '0'
+      job: '/home/automation/scripts/log_date'

@@ -1,0 +1,11 @@
+---
+- name: Create mysql repository
+  become: yes
+  hosts: database
+
+  tasks:
+  - name: Add repo
+    copy:
+      src: '/home/automation/plays/repositories/database/mysql56-community.repo'
+      dest: '/etc/yum.repos.d'
+      mode: '0644'

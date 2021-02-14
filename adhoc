@@ -1,0 +1,8 @@
+#! /bin/bash
+ansible all -m ansible.builtin.user -a "name=automation password='\$6\$vgVrQp6STaU24Unv\$p4EKoRLqbMuKxKT9nsNdEjHo3p.1TJWxwBTUkS/WmFmHQakOOud7VlT.oniGMnEzwZcv7ymh1sJHMpCRJCd3B1'" -u root 
+
+ansible all -m ansible.builtin.file -a "dest=/home/automation/.ssh mode=700 owner=automation group=automation state=directory" -u root
+
+ansible all -m ansible.builtin.copy -a "src=/home/automation/.ssh/id_rsa.pub dest=/home/automation/.ssh/authorized_keys mode=600 owner=automation group=automation" -u root
+
+ansible all -m shell -a "awk -i inplace -v PASSPER='automation ALL=(ALL) NOPASSWD: ALL' 'BEGIN { replaced=0 } { if (\$0 ~ /^automation/) { replaced = 1; print PASSPER; } else { print \$0 } } ENDFILE { if (replaced == 0) { print PASSPER; } }' /etc/sudoers" -u root

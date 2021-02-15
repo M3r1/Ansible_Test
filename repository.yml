@@ -6,6 +6,14 @@
   tasks:
   - name: Add repo
     copy:
-      src: '/home/automation/plays/repositories/database/mysql56-community.repo'
+      src: '/home/automation/plays/repositories/database/mysql-community.repo'
       dest: '/etc/yum.repos.d'
       mode: '0644'
+
+  - name: Disable MYSQL default appstream repo
+    shell: 
+      cmd: "dnf module reset mysql -y && dnf module disable mysql -y"
+
+  - name: Enable channel for MySQL 5.7
+    dnf:
+      enablerepo: "mysql57-community"

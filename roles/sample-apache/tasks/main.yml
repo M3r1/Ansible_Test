@@ -1,0 +1,49 @@
+---
+- name: Install httpd
+  become: yes
+  dnf:
+    name: httpd
+    state: present
+
+- name: Install mod_ssl
+  become: yes
+  dnf:
+    name: mod_ssl
+    state: present
+
+- name: Install php
+  become: yes
+  dnf:
+    name: php
+    state: present
+
+- name: Allow http
+  become: yes
+  firewalld:
+    port: 80/tcp
+    permanent: yes
+    state: enabled
+
+- name: Allow https
+  become: yes
+  firewalld:
+    port: 443/tcp
+    permanent: yes
+    state: enabled
+
+- name: Ensure apache is running
+  become: yes
+  service:
+    name: httpd
+    state: started
+
+- name: Set up index.html 
+  become: yes
+  template:
+    src: "index.html.j2"
+    dest: "/var/www/html/index.html"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+  - Restart apache

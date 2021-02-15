@@ -1,0 +1,70 @@
+---
+- name: Install mysql-community-server
+  become: yes
+  dnf:
+    name: "mysql-community-server"
+    state: "present"
+
+- name: Configure mysql incoming traffic
+  become: yes
+  firewalld:
+    port: 3306/tcp
+    permanent: yes
+    state: enabled
+
+- name: Install python
+  become: yes
+  dnf:
+    name: "python3"
+    state: "present"
+
+- name: Install pymysql
+  become: yes
+  pip:
+    name: "PyMySQL"
+    state: "present"
+
+- name: Ensure MySQL is up-and-running
+  become: yes
+  shell:
+    cmd: systemctl enable --now mysqld
+
+- name: Import database password 
+  include_vars: 
+    file: /home/automation/plays/secret.yml
+
+- name: Check for a temp password
+  become: yes
+  shell:
+    cmd: "cat /var/log/mysqld.log | grep 'A temporary password is generated for root' | tail -1 | awk -F' ' '{print $NF}'"
+  register: temp_database_password
+
+- name: Remove temp password from the log file
+  become: yes
+  ansible.builtin.lineinfile:
+    path: /var/log/mysqld.log
+    state: absent
+    regexp: 'A\stemporary\spassword\sis\sgenerated\sfor\sroot'
+
+- name: Execute command in mysql shell and set new password
+  become: yes
+  shell: 'mysql -e "SET GLOBAL validate_password_policy=LOW; SET PASSWORD = PASSWORD(''{{  database_password  }}'');" --connect-expired-password -uroot -p"{{ temp_database_password.stdout }}"'
+  when: temp_database_password.stdout != ""
+
+- name: Set root password 
+  become: yes
+  mysql_user:
+    name: root
+    password: "{{ database_password }}"
+    check_implicit_admin: true
+  when: temp_database_password.stdout == ""
+
+- name: Set perm .my.cnf
+  become: yes
+  template:
+    src: "root.my.cnf.j2"
+    dest: "/root/.my.cnf"
+    owner: root
+    group: root
+    mode: 0600
+

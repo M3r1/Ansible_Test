@@ -1,0 +1,42 @@
+---
+- name: Install lvm tools
+  become: yes
+  dnf:
+    name: lvm2
+    state: present
+    update_cache: yes
+
+- name: Create primary partition
+  become: yes
+  parted:
+    device: /dev/sdb
+    number: 1
+    state: present
+    part_end: 800MB
+
+- name: Create a logical group
+  become: yes
+  lvg:
+    vg: vg_database
+    pvs: /dev/sdb1
+
+- name: Create a logical volume
+  become: yes
+  lvol:
+    vg: vg_database
+    lv: lv_mysql
+    size: 512m
+
+- name: Make fs
+  become: yes
+  filesystem:
+    fstype: xfs
+    dev: /dev/vg_database/lv_mysql
+
+- name: Mount fs
+  become: yes
+  mount: 
+    path: /mnt/mysql_backups
+    src: /dev/vg_database/lv_mysql
+    fstype: xfs
+    state: mounted

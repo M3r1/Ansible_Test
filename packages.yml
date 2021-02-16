@@ -1,0 +1,31 @@
+---
+- name: Install proxy packages
+  hosts: proxy
+  become: yes
+  
+  tasks:
+  - name: Install tcpdump
+    dnf:
+      name: tcpdump
+      state: present
+
+  - name: Install mailx
+    dnf:
+      name: mailx
+      state: present
+
+
+- name: Install database packages
+  hosts: database
+  become: yes
+  
+  tasks:
+  - name: Install lsof
+    dnf:
+      name: lsof
+      state: present
+
+  - name: Install mailx
+    dnf:
+      name: mailx
+      state: present

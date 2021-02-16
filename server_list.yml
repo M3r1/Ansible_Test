@@ -1,0 +1,25 @@
+---
+- name: Create a server list file on database
+  hosts: database
+  become: yes
+
+  tasks:
+  - name: Copy template
+    template:
+      src: /home/automation/plays/templates/server_list.txt.j2
+      dest: /etc/server_list.txt
+      owner: automation
+      group: automation
+      mode: '0600'
+
+  - name: Install python core utils
+    dnf:
+      name: policycoreutils-python-utils
+      state: present
+
+  - name: Set up SELinux label
+    sefcontext:
+      target: '/etc/server_list.txt'
+      setype: 'net_conf_t'
+      reload: yes
+      state: present

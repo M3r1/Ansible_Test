@@ -1,0 +1,9 @@
+--- 
+- hosts: webservers
+  
+  tasks:
+  - name: Set default boot target
+    file:
+      src: /usr/lib/systemd/system/multi-user.target
+      dest: /etc/systemd/system/default.target
+      state: link
